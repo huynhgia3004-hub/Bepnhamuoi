@@ -1,0 +1,94 @@
+{
+  "shop": {
+    "name": "Bếp Nhà Muội",
+    "tagline": "Tea & Bakery — An Nhơn",
+    "address": "356 Ngô Gia Tự, An Nhơn, Việt Nam",
+    "phone": "0933402327",
+    "phoneDisplay": "0933 402 327",
+    "zalo": "0933402327",
+    "facebookId": "100063909225074",
+    "facebookUrl": "https://www.facebook.com/profile.php?id=100063909225074",
+    "facebookPageName": "Bếp nhà Muội - Tea & Bakery | An Nhon"
+  },
+  "categories": [
+    { "id": "banh-kem", "name": "Bánh Kem" },
+    { "id": "banh-nuong", "name": "Bánh Nướng" },
+    { "id": "cheesecake", "name": "Cheesecake" },
+    { "id": "tea", "name": "Trà & Đồ Uống" },
+    { "id": "cookies", "name": "Cookies & Bánh Ngọt" }
+  ],
+  "products": [
+    {
+      "id": "p01",
+      "name": "Bánh Kem Dâu Tươi",
+      "category": "banh-kem",
+      "price": 285000,
+      "image": "assets/products/placeholder-1.svg",
+      "desc": "Bánh kem mềm mịn phủ dâu tươi, vị ngọt thanh, thích hợp cho sinh nhật và tiệc nhỏ.",
+      "featured": true
+    },
+    {
+      "id": "p02",
+      "name": "Bánh Kem Socola",
+      "category": "banh-kem",
+      "price": 320000,
+      "image": "assets/products/placeholder-2.svg",
+      "desc": "Vị socola đậm đà, phủ ganache mượt, topping hạnh nhân rang.",
+      "featured": true
+    },
+    {
+      "id": "p03",
+      "name": "Cheesecake Chanh Dây",
+      "category": "cheesecake",
+      "price": 185000,
+      "image": "assets/products/placeholder-3.svg",
+      "desc": "Lớp cheese béo mịn, sốt chanh dây chua nhẹ, đế bánh giòn thơm.",
+      "featured": true
+    },
+    {
+      "id": "p04",
+      "name": "Bánh Mì Bơ Tỏi Nướng",
+      "category": "banh-nuong",
+      "price": 45000,
+      "image": "assets/products/placeholder-4.svg",
+      "desc": "Bánh mì nướng giòn rụm, phết bơ tỏi thơm lừng.",
+      "featured": true
+    },
+    {
+      "id": "p05",
+      "name": "Trà Đào Cam Sả",
+      "category": "tea",
+      "price": 42000,
+      "image": "assets/products/placeholder-5.svg",
+      "desc": "Trà đào tươi mát, thêm cam và sả, giải nhiệt ngày nắng.",
+      "featured": false
+    },
+    {
+      "id": "p06",
+      "name": "Cookies Socola Chip",
+      "category": "cookies",
+      "price": 25000,
+      "image": "assets/products/placeholder-6.svg",
+      "desc": "Cookies giòn tan, chip socola tan chảy, thơm vị bơ.",
+      "featured": false
+    },
+    {
+      "id": "p07",
+      "name": "Bánh Tiramisu",
+      "category": "cheesecake",
+      "price": 155000,
+      "image": "assets/products/placeholder-7.svg",
+      "desc": "Lớp mascarpone mịn, cà phê đậm, rắc cacao nguyên chất.",
+      "featured": false
+    },
+    {
+      "id": "p08",
+      "name": "Matcha Latte",
+      "category": "tea",
+      "price": 48000,
+      "image": "assets/products/placeholder-8.svg",
+      "desc": "Matcha Nhật thượng hạng, sữa tươi béo nhẹ.",
+      "featured": false
+    }
+  ]
+}

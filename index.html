@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Bếp Nhà Muội — Tea & Bakery | An Nhơn</title>
+  <meta name="description" content="Bếp Nhà Muội — bánh ngọt thủ công, trà tươi tại An Nhơn. Đặt hàng qua Zalo hoặc điện thoại."/>
+  <link rel="icon" href="assets/products/placeholder-1.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="navbar">
+  <div class="nav-inner">
+    <a class="logo" href="index.html">
+      <span class="logo-mark">M</span>
+      <span>Bếp Nhà Muội</span>
+    </a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#home" class="active">Trang chủ</a></li>
+        <li><a href="#about">Về chúng tôi</a></li>
+        <li><a href="#featured">Sản phẩm</a></li>
+        <li><a href="products.html">Thực đơn</a></li>
+        <li><a href="#contact">Liên hệ</a></li>
+      </ul>
+    </nav>
+    <a class="nav-cta" data-shop-zalo href="#">Đặt hàng Zalo</a>
+    <button class="burger" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="home">
+  <div class="container hero-grid">
+    <div>
+      <span class="hero-kicker">★ Tea &amp; Bakery — An Nhơn</span>
+      <h1>Bánh ngọt <em>thủ công</em>,<br/>trà tươi mỗi ngày.</h1>
+      <p data-shop-tagline>Mỗi chiếc bánh là một câu chuyện — được nướng bằng tâm, phục vụ bằng nụ cười.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#featured">Xem sản phẩm →</a>
+        <a class="btn btn-zalo" data-shop-zalo href="#">💬 Chat Zalo</a>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-visual-inner">
+        <div class="big">M</div>
+        <div class="sub">MUỘI · BAKERY</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="about" id="about">
+  <div class="container about-grid">
+    <div class="about-image">🥐</div>
+    <div>
+      <span class="hero-kicker">Về chúng tôi</span>
+      <h2>Nơi hương vị gặp sự ấm áp.</h2>
+      <p>Bếp Nhà Muội ra đời từ tình yêu với bánh trái và khao khát mang những mẻ bánh tươi ngon, nguyên liệu chọn lọc đến từng khách hàng tại An Nhơn.</p>
+      <p>Chúng tôi tin rằng một chiếc bánh ngon không chỉ ở hương vị — mà còn ở cách nó kể câu chuyện về người làm ra nó.</p>
+      <div class="about-stats">
+        <div class="stat"><div class="num">50+</div><div class="lbl">Món bánh</div></div>
+        <div class="stat"><div class="num">100%</div><div class="lbl">Thủ công</div></div>
+        <div class="stat"><div class="num">Mỗi ngày</div><div class="lbl">Tươi mới</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURED PRODUCTS ============ -->
+<section id="featured">
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">Best sellers</span>
+      <h2>Sản phẩm nổi bật</h2>
+      <p>Những món được khách yêu thích nhất — nướng mới mỗi ngày.</p>
+    </div>
+    <div class="prod-grid" id="featured-grid">
+      <!-- JS fills this -->
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+      <a class="btn btn-outline" href="products.html">Xem toàn bộ thực đơn →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FB + CONTACT ============ -->
+<section class="fb-section" id="contact">
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">Ghé thăm</span>
+      <h2>Theo dõi &amp; liên hệ</h2>
+      <p>Cập nhật sản phẩm mới và ưu đãi trên Facebook — hoặc nhắn Zalo để đặt hàng ngay.</p>
+    </div>
+
+    <div class="fb-grid">
+      <!-- FACEBOOK PAGE PLUGIN (live feed from Bếp Nhà Muội FB page) -->
+      <div class="fb-embed">
+        <iframe
+          src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D100063909225074&tabs=timeline&width=500&height=600&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
+          width="500" height="600" style="border:none;overflow:hidden;width:100%;"
+          scrolling="no" frameborder="0" allowfullscreen="true"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          title="Facebook - Bếp Nhà Muội"></iframe>
+      </div>
+
+      <!-- CONTACT CARD -->
+      <div class="contact-card">
+        <div class="contact-row">
+          <div class="contact-icon">📍</div>
+          <div>
+            <h4>Địa chỉ</h4>
+            <p data-shop-addr>356 Ngô Gia Tự, An Nhơn, Việt Nam</p>
+          </div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon">📞</div>
+          <div>
+            <h4>Điện thoại</h4>
+            <a data-shop-phone href="#">0933 340 232</a>
+          </div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon">💬</div>
+          <div>
+            <h4>Zalo</h4>
+            <a data-shop-zalo href="#" target="_blank" rel="noopener">Nhắn tin qua Zalo</a>
+          </div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-icon">🕒</div>
+          <div>
+            <h4>Giờ mở cửa</h4>
+            <p>Hằng ngày: 7:00 — 22:00</p>
+          </div>
+        </div>
+        <div class="contact-actions">
+          <a class="btn btn-primary" data-shop-phone href="#">📞 Gọi ngay</a>
+          <a class="btn btn-zalo" data-shop-zalo href="#" target="_blank" rel="noopener">💬 Zalo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <h4 data-shop-name>Bếp Nhà Muội</h4>
+        <p data-shop-tagline></p>
+        <p style="margin-top:12px;">Bánh thủ công · Trà tươi · Mỗi ngày.</p>
+        <div class="foot-social">
+          <a data-shop-fb href="#" target="_blank" rel="noopener" aria-label="Facebook">f</a>
+          <a data-shop-zalo href="#" target="_blank" rel="noopener" aria-label="Zalo">Z</a>
+          <a data-shop-phone href="#" aria-label="Phone">☎</a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Khám phá</h4>
+        <ul>
+          <li><a href="#about">Về chúng tôi</a></li>
+          <li><a href="#featured">Nổi bật</a></li>
+          <li><a href="products.html">Thực đơn</a></li>
+          <li><a href="#contact">Liên hệ</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Liên hệ</h4>
+        <p data-shop-addr></p>
+        <p style="margin-top:8px;"><a data-shop-phone href="#"></a></p>
+      </div>
+      <div class="foot-col">
+        <h4>Giờ mở cửa</h4>
+        <p>Thứ 2 — Chủ Nhật</p>
+        <p>7:00 — 22:00</p>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      © <span data-shop-year></span> <span data-shop-name></span>. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<!-- Floating action buttons -->
+<div class="fab-stack">
+  <a class="fab fab-zalo"  data-shop-zalo href="#" target="_blank" rel="noopener" aria-label="Zalo" title="Chat Zalo">Z</a>
+  <a class="fab fab-fb"    data-shop-fb   href="#" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">f</a>
+  <a class="fab fab-call"  data-shop-phone href="#" aria-label="Call" title="Gọi ngay">☎</a>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
