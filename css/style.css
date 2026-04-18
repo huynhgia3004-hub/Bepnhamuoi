@@ -290,6 +290,7 @@ footer {
 .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
 .foot-col h4 { color: #fff; font-size: 16px; margin-bottom: 18px; font-family: 'Inter', sans-serif; font-weight: 600; letter-spacing: .5px; }
 .foot-col p, .foot-col a { color: #D4B59A; font-size: 14px; line-height: 1.9; }
+[data-shop-phone] { white-space: nowrap; }
 .foot-col a:hover { color: var(--gold); }
 .foot-col ul { list-style: none; }
 .foot-social { display: flex; gap: 10px; margin-top: 16px; }
