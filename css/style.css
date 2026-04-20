@@ -297,9 +297,10 @@ footer {
 .foot-social a {
   width: 38px; height: 38px; border-radius: 50%;
   background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center;
-  color: #E8D5B7; font-size: 16px; transition: background .2s;
+  color: #E8D5B7; transition: background .2s, color .2s;
 }
 .foot-social a:hover { background: var(--caramel); color: #fff; }
+.foot-social a svg { width: 18px; height: 18px; display: block; }
 .foot-bottom {
   border-top: 1px solid rgba(255,255,255,0.1);
   padding-top: 22px; text-align: center; font-size: 13px; color: #A89078;
@@ -316,9 +317,34 @@ footer {
   text-decoration: none;
 }
 .fab:hover { transform: scale(1.08); }
-.fab-zalo { background: #0068FF; }
-.fab-fb   { background: #1877F2; }
-.fab-call { background: #25D366; }
+.fab svg { width: 28px; height: 28px; display: block; }
+.fab-zalo      { background: #0068FF; }
+.fab-messenger { background: linear-gradient(135deg, #00C6FF 0%, #0078FF 50%, #7646FF 100%); }
+.fab-fb        { background: #1877F2; }
+.fab-call      { background: #25D366; }
+
+/* Brand button variants */
+.btn svg { width: 18px; height: 18px; display: block; }
+.btn-messenger {
+  background: linear-gradient(135deg, #00C6FF 0%, #0078FF 50%, #7646FF 100%);
+  color: #fff;
+}
+.btn-messenger:hover { color: #fff; transform: translateY(-2px); filter: brightness(1.08); }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: 110px;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--brown-dark); color: #fff;
+  padding: 14px 22px; border-radius: 999px;
+  font-size: 14px; font-weight: 500; line-height: 1.4;
+  box-shadow: var(--shadow-lg);
+  max-width: calc(100vw - 32px); text-align: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s;
+  z-index: 200;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 860px) {

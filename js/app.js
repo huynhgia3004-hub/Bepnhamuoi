@@ -1,5 +1,5 @@
 // Bếp Nhà Muội — site logic
-// Loads products.json, renders featured + full catalog, handles filter/search/order.
+// Loads products.json, renders featured + full catalog, handles filter/search/order via Messenger.
 
 const DATA_URL = 'data/products.json';
 const VND = n => new Intl.NumberFormat('vi-VN').format(n) + '₫';
@@ -23,28 +23,85 @@ async function loadData() {
   }
 }
 
+function messengerUrl() {
+  return 'https://m.me/' + STATE.shop.facebookId;
+}
+
 // Fill shop details across the page (phone, address, social links, etc.)
 function applyShop() {
   const s = STATE.shop;
   document.querySelectorAll('[data-shop-name]').forEach(el => el.textContent = s.name);
   document.querySelectorAll('[data-shop-tagline]').forEach(el => el.textContent = s.tagline);
   document.querySelectorAll('[data-shop-addr]').forEach(el => el.textContent = s.address);
-  document.querySelectorAll('[data-shop-phone]').forEach(el => { el.textContent = s.phoneDisplay; el.href = 'tel:' + s.phone; });
+  document.querySelectorAll('[data-shop-phone]').forEach(el => {
+    if (!el.hasAttribute('data-shop-phone-icon')) el.textContent = s.phoneDisplay;
+    el.href = 'tel:' + s.phone;
+  });
   document.querySelectorAll('[data-shop-zalo]').forEach(el => el.href = 'https://zalo.me/' + s.zalo);
   document.querySelectorAll('[data-shop-fb]').forEach(el => el.href = s.facebookUrl);
+  document.querySelectorAll('[data-shop-messenger]').forEach(el => el.href = messengerUrl());
   document.querySelectorAll('[data-shop-year]').forEach(el => el.textContent = new Date().getFullYear());
 }
 
-function orderUrl(product) {
-  const msg = `Xin chào Bếp Nhà Muội! Tôi muốn đặt: ${product.name} (${VND(product.price)})`;
-  return `https://zalo.me/${STATE.shop.zalo}?msg=${encodeURIComponent(msg)}`;
+function orderMessage(p) {
+  const catName = (STATE.categories.find(c => c.id === p.category) || {}).name || '';
+  const img = new URL(p.image, location.href).href;
+  return [
+    'mình muốn order món này Bếp ơi!',
+    '',
+    '• Tên: ' + p.name,
+    '• Mã: ' + p.id,
+    '• Giá: ' + VND(p.price),
+    '• Loại: ' + catName,
+    '• Hình: ' + img,
+  ].join('\n');
+}
+
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (_) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  }
+}
+
+async function orderProduct(productId) {
+  const p = STATE.products.find(x => x.id === productId);
+  if (!p) return;
+  const msg = orderMessage(p);
+  const ok = await copyToClipboard(msg);
+  showToast(ok
+    ? '✅ Đã copy đơn! Dán (Ctrl+V) vào Messenger rồi gửi cho Bếp nhé.'
+    : '⚠️ Không copy được. Hãy chụp màn hình sản phẩm và gửi Messenger.');
+  window.open(messengerUrl(), '_blank', 'noopener');
+}
+
+function showToast(msg) {
+  let el = document.querySelector('.toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => el.classList.remove('show'), 4000);
 }
 
 function productCard(p) {
   const catName = (STATE.categories.find(c => c.id === p.category) || {}).name || '';
   return `
     <article class="prod-card">
-      <a class="prod-img" href="${orderUrl(p)}" target="_blank" rel="noopener">
+      <a class="prod-img" href="#" data-order="${p.id}" aria-label="Đặt ${p.name} qua Messenger">
         <img src="${p.image}" alt="${p.name}" loading="lazy"/>
       </a>
       <div class="prod-body">
@@ -53,7 +110,7 @@ function productCard(p) {
         <p class="prod-desc">${p.desc}</p>
         <div class="prod-foot">
           <span class="prod-price">${VND(p.price)}</span>
-          <a class="prod-order" href="${orderUrl(p)}" target="_blank" rel="noopener">Đặt Zalo</a>
+          <a class="prod-order" href="#" data-order="${p.id}">Đặt Messenger</a>
         </div>
       </div>
     </article>`;
@@ -111,6 +168,14 @@ function initNav() {
     links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('open')));
   }
 }
+
+// Delegated click: any element with [data-order] triggers Messenger order flow
+document.addEventListener('click', e => {
+  const trigger = e.target.closest('[data-order]');
+  if (!trigger) return;
+  e.preventDefault();
+  orderProduct(trigger.dataset.order);
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   initNav();
