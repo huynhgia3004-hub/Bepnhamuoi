@@ -23,8 +23,9 @@ async function loadData() {
   }
 }
 
-function messengerUrl() {
-  return 'https://m.me/' + STATE.shop.facebookId;
+function messengerUrl(text) {
+  const base = 'https://m.me/' + STATE.shop.facebookId;
+  return text ? base + '?text=' + encodeURIComponent(text) : base;
 }
 
 // Fill shop details across the page (phone, address, social links, etc.)
@@ -40,6 +41,8 @@ function applyShop() {
   document.querySelectorAll('[data-shop-zalo]').forEach(el => el.href = 'https://zalo.me/' + s.zalo);
   document.querySelectorAll('[data-shop-fb]').forEach(el => el.href = s.facebookUrl);
   document.querySelectorAll('[data-shop-messenger]').forEach(el => el.href = messengerUrl());
+  // Default Messenger opener links (no product context) — no prefill text
+
   document.querySelectorAll('[data-shop-year]').forEach(el => el.textContent = new Date().getFullYear());
 }
 
@@ -77,11 +80,10 @@ async function orderProduct(productId) {
   const p = STATE.products.find(x => x.id === productId);
   if (!p) return;
   const msg = orderMessage(p);
-  const ok = await copyToClipboard(msg);
-  showToast(ok
-    ? '✅ Đã copy đơn! Dán (Ctrl+V) vào Messenger rồi gửi cho Bếp nhé.'
-    : '⚠️ Không copy được. Hãy chụp màn hình sản phẩm và gửi Messenger.');
-  window.open(messengerUrl(), '_blank', 'noopener');
+  // Clipboard fallback in case Messenger ignores the ?text= param
+  await copyToClipboard(msg);
+  window.open(messengerUrl(msg), '_blank', 'noopener');
+  showToast('Mở Messenger — nội dung đơn đã sẵn trong khung chat, bấm Gửi nhé.');
 }
 
 function showToast(msg) {
@@ -101,7 +103,7 @@ function productCard(p) {
   const catName = (STATE.categories.find(c => c.id === p.category) || {}).name || '';
   return `
     <article class="prod-card">
-      <a class="prod-img" href="#" data-order="${p.id}" aria-label="Đặt ${p.name} qua Messenger">
+      <a class="prod-img" href="${p.image}" data-lightbox="${p.id}" aria-label="Xem ảnh ${p.name}">
         <img src="${p.image}" alt="${p.name}" loading="lazy"/>
       </a>
       <div class="prod-body">
@@ -110,11 +112,42 @@ function productCard(p) {
         <p class="prod-desc">${p.desc}</p>
         <div class="prod-foot">
           <span class="prod-price">${VND(p.price)}</span>
-          <a class="prod-order" href="#" data-order="${p.id}">Đặt Messenger</a>
+          <a class="prod-order" href="#" data-order="${p.id}">Order now</a>
         </div>
       </div>
     </article>`;
 }
+
+// Lightbox — open on image click, close on outside/ESC/X
+function openLightbox(src, alt) {
+  let box = document.querySelector('.lightbox');
+  if (!box) {
+    box = document.createElement('div');
+    box.className = 'lightbox';
+    box.innerHTML = '<button class="lightbox-close" aria-label="Đóng">×</button><img alt=""/>';
+    document.body.appendChild(box);
+    box.addEventListener('click', e => {
+      if (e.target === box || e.target.classList.contains('lightbox-close')) closeLightbox();
+    });
+  }
+  const img = box.querySelector('img');
+  img.src = src; img.alt = alt || '';
+  document.body.classList.add('lightbox-open');
+  box.classList.add('show');
+}
+function closeLightbox() {
+  document.body.classList.remove('lightbox-open');
+  const box = document.querySelector('.lightbox');
+  if (box) box.classList.remove('show');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+document.addEventListener('click', e => {
+  const trigger = e.target.closest('[data-lightbox]');
+  if (!trigger) return;
+  e.preventDefault();
+  const img = trigger.querySelector('img');
+  openLightbox(trigger.getAttribute('href') || (img && img.src), img && img.alt);
+});
 
 function renderFeatured() {
   const host = document.querySelector('#featured-grid');
