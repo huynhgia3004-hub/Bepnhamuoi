@@ -214,3 +214,25 @@ document.addEventListener('DOMContentLoaded', () => {
   initNav();
   loadData();
 });
+
+// Facebook Page plugin: fit iframe width to its container (FB allows 180-500)
+function fitFacebookFrames(force) {
+  document.querySelectorAll('iframe[src*="facebook.com/plugins/page.php"]').forEach(f => {
+    const parent = f.parentElement;
+    if (!parent) return;
+    const cs = getComputedStyle(parent);
+    const inner = parent.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    if (!(inner > 0)) return;
+    const w = Math.max(180, Math.min(500, Math.floor(inner)));
+    if (!force && f._fbW && Math.abs(w - f._fbW) < 40) return;
+    const m = f.src.match(/[?&]width=(\d+)/);
+    const cur = m ? parseInt(m[1], 10) : 0;
+    f._fbW = w;
+    if (Math.abs(cur - w) <= 4) return;
+    f.src = f.src.replace(/([?&]width=)\d+/, '$1' + w);
+    f.setAttribute('width', w);
+  });
+}
+fitFacebookFrames(true);
+let _fbT;
+window.addEventListener('resize', () => { clearTimeout(_fbT); _fbT = setTimeout(() => fitFacebookFrames(false), 250); });
