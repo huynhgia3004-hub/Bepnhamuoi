@@ -8,12 +8,12 @@ let STATE = { shop: null, categories: [], products: [], activeCat: 'all', query:
 
 async function loadData() {
   try {
-    const res = await fetch(DATA_URL);
+    const res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     STATE.shop = data.shop;
     STATE.categories = data.categories;
-    STATE.products = data.products;
+    STATE.products = data.products.filter(p => p.hidden !== true);
     applyShop();
     renderAll();
   } catch (err) {

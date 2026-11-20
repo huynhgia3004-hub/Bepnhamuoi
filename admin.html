@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="robots" content="noindex"/>
+  <title>Quản lý — Bếp Nhà Muội</title>
+  <link rel="icon" href="assets/bepnhamuoi.jpg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/admin.css"/>
+</head>
+<body class="admin-body">
+
+<header class="adm-header">
+  <div class="adm-header-inner">
+    <div>
+      <h1 class="adm-title">Quản lý Bếp Nhà Muội</h1>
+      <a class="adm-back" href="index.html">← Về website</a>
+    </div>
+    <button type="button" class="btn btn-outline adm-logout" id="btn-logout" hidden>Thoát</button>
+  </div>
+</header>
+
+<main class="adm-main">
+  <div id="banner" class="adm-banner" role="status" hidden></div>
+
+  <!-- Cài đặt lần đầu -->
+  <section id="view-setup" class="adm-card" hidden>
+    <h2>Cài đặt lần đầu</h2>
+    <p class="adm-help">Dán mã quản lý (do Pháp gửi / theo hướng dẫn <code>HUONG_DAN_ADMIN.md</code>), rồi tự đặt một mã PIN để mở khóa lần sau.</p>
+    <form id="form-setup" autocomplete="off" novalidate>
+      <label class="adm-field"><span>Mã quản lý</span>
+        <input type="password" id="setup-token" autocomplete="off" autocapitalize="off" spellcheck="false"/></label>
+      <label class="adm-field"><span>Đặt mã PIN (4–8 chữ số)</span>
+        <input type="password" id="setup-pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password"/></label>
+      <label class="adm-field"><span>Nhập lại mã PIN</span>
+        <input type="password" id="setup-pin2" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password"/></label>
+      <p class="adm-error" id="setup-error" hidden></p>
+      <button type="submit" class="btn btn-primary adm-big" id="setup-submit">Lưu và bắt đầu</button>
+    </form>
+  </section>
+
+  <!-- Nhập PIN -->
+  <section id="view-pin" class="adm-card" hidden>
+    <h2>Nhập mã PIN</h2>
+    <form id="form-pin" autocomplete="off" novalidate>
+      <label class="adm-field"><span>Mã PIN</span>
+        <input type="password" id="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="current-password"/></label>
+      <p class="adm-error" id="pin-error" hidden></p>
+      <button type="submit" class="btn btn-primary adm-big" id="pin-submit">Mở khóa</button>
+    </form>
+    <p class="adm-center"><a href="#" id="link-forgot">Quên PIN / dùng mã mới</a></p>
+  </section>
+
+  <!-- Danh sách -->
+  <section id="view-main" hidden>
+    <button type="button" class="btn adm-add adm-big" id="btn-add">+ Thêm sản phẩm</button>
+    <input type="search" id="search" class="adm-search" placeholder="Tìm sản phẩm…" aria-label="Tìm sản phẩm"/>
+    <div id="loading" class="adm-loading" hidden><span class="adm-spinner"></span> Đang tải…</div>
+    <p id="list-error" class="adm-error" hidden></p>
+    <ul id="list" class="adm-list"></ul>
+    <p id="list-empty" class="adm-help adm-center" hidden>Không có sản phẩm nào.</p>
+  </section>
+</main>
+
+<!-- Form thêm / sửa -->
+<div id="modal" class="adm-modal" hidden>
+  <div class="adm-modal-box" role="dialog" aria-modal="true" aria-labelledby="form-title">
+    <h2 id="form-title">Thêm sản phẩm</h2>
+    <form id="form-product" novalidate>
+      <label class="adm-field"><span>Danh mục</span>
+        <select id="f-category"></select></label>
+      <label class="adm-field"><span>Tên sản phẩm</span>
+        <input type="text" id="f-name" autocomplete="off"/></label>
+      <div class="adm-field"><span>Hình ảnh</span>
+        <div class="adm-preview"><img id="f-preview" alt="" hidden/></div>
+        <button type="button" class="btn btn-outline adm-big" id="btn-pick">Chọn ảnh…</button>
+        <input type="file" id="f-file" accept="image/*" hidden/>
+      </div>
+      <label class="adm-field"><span>Ghi chú</span>
+        <textarea id="f-desc" rows="3"></textarea></label>
+      <label class="adm-field"><span>Giá (đ)</span>
+        <span class="adm-price"><input type="text" id="f-price" inputmode="numeric" autocomplete="off" placeholder="0"/><b>đ</b></span></label>
+      <label class="adm-check"><input type="checkbox" id="f-featured"/> <span>Hiện ở trang chủ</span></label>
+      <label class="adm-check"><input type="checkbox" id="f-hidden"/> <span>Tạm ẩn / hết hàng</span></label>
+      <p class="adm-error" id="form-error" hidden></p>
+      <p class="adm-saving" id="form-saving" hidden><span class="adm-spinner"></span> Đang lưu…</p>
+      <div class="adm-actions">
+        <button type="submit" class="btn btn-primary adm-big" id="btn-ok">OK</button>
+        <button type="button" class="btn btn-outline adm-big" id="btn-cancel">Hủy</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/admin-core.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
