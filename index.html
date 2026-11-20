@@ -57,35 +57,32 @@
   </div>
 </section>
 
-<!-- ============ FACEBOOK FEED ============ -->
-<section class="fb-feed" id="facebook">
-  <div class="container">
-    <div class="section-head">
-      <span class="kicker">Facebook</span>
-      <h2>Mới nhất từ Facebook</h2>
-      <p>Bánh mới ra lò mỗi ngày trên fanpage.</p>
+<!-- ============ FACEBOOK + ABOUT (2 columns) ============ -->
+<section class="about">
+  <div class="container split-grid">
+    <div class="split-fb" id="facebook">
+      <div class="split-head">
+        <span class="kicker">Facebook</span>
+        <h2>Mới nhất từ Facebook</h2>
+        <p>Bánh mới ra lò mỗi ngày trên fanpage.</p>
+      </div>
+      <!-- FACEBOOK PAGE PLUGIN (live feed from Bếp Nhà Muội FB page) -->
+      <div class="fb-embed">
+        <iframe
+          src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D100063909225074&tabs=timeline&width=500&height=600&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
+          width="500" height="600" style="border:none;overflow:hidden;width:100%;"
+          scrolling="no" frameborder="0" allowfullscreen="true"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          title="Facebook - Bếp Nhà Muội"></iframe>
+      </div>
     </div>
-    <!-- FACEBOOK PAGE PLUGIN (live feed from Bếp Nhà Muội FB page) -->
-    <div class="fb-embed">
-      <iframe
-        src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D100063909225074&tabs=timeline&width=500&height=600&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
-        width="500" height="600" style="border:none;overflow:hidden;width:100%;"
-        scrolling="no" frameborder="0" allowfullscreen="true"
-        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-        title="Facebook - Bếp Nhà Muội"></iframe>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ABOUT ============ -->
-<section class="about" id="about">
-  <div class="container about-grid">
-    <div class="about-image">🥐</div>
-    <div>
-      <span class="hero-kicker">Về chúng tôi</span>
-      <h2>Nơi hương vị gặp sự ấm áp.</h2>
-      <p>Bếp Nhà Muội ra đời từ tình yêu với bánh trái và khao khát mang những mẻ bánh tươi ngon, nguyên liệu chọn lọc đến từng khách hàng tại An Nhơn.</p>
-      <p>Chúng tôi tin rằng một chiếc bánh ngon không chỉ ở hương vị — mà còn ở cách nó kể câu chuyện về người làm ra nó.</p>
+    <div class="split-about" id="about">
+      <div>
+        <span class="hero-kicker">🥐 Về chúng tôi</span>
+        <h2>Nơi hương vị gặp sự ấm áp.</h2>
+        <p>Bếp Nhà Muội ra đời từ tình yêu với bánh trái và khao khát mang những mẻ bánh tươi ngon, nguyên liệu chọn lọc đến từng khách hàng tại An Nhơn.</p>
+        <p>Chúng tôi tin rằng một chiếc bánh ngon không chỉ ở hương vị — mà còn ở cách nó kể câu chuyện về người làm ra nó.</p>
+      </div>
       <div class="about-stats">
         <div class="stat"><div class="num">50+</div><div class="lbl">Món bánh</div></div>
         <div class="stat"><div class="num">100%</div><div class="lbl">Thủ công</div></div>
@@ -223,6 +220,7 @@
     </div>
     <div class="foot-bottom">
       © <span data-shop-year></span> <span data-shop-name></span>. All rights reserved.
+      <a class="admin-link" href="admin.html">Quản lý</a>
     </div>
   </div>
 </footer>

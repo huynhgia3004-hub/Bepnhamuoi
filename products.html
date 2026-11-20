@@ -37,39 +37,35 @@
   </div>
 </header>
 
-<section class="fb-feed" id="facebook" style="padding-top:60px;">
-  <div class="container">
-    <div class="section-head">
-      <span class="kicker">Facebook</span>
-      <h2>Mới nhất từ Facebook</h2>
-      <p>Bánh mới ra lò mỗi ngày trên fanpage.</p>
-    </div>
-    <div class="fb-embed">
-      <iframe
-        src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D100063909225074&tabs=timeline&width=500&height=600&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
-        width="500" height="600" style="border:none;overflow:hidden;width:100%;"
-        scrolling="no" frameborder="0" allowfullscreen="true"
-        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-        title="Facebook - Bếp Nhà Muội"></iframe>
-    </div>
-  </div>
-</section>
+<section>
+  <div class="container products-layout">
+    <div class="products-main">
+      <div class="section-head">
+        <span class="kicker">Thực đơn</span>
+        <h2>Toàn bộ sản phẩm</h2>
+        <p>Chọn danh mục hoặc tìm kiếm theo tên món.</p>
+      </div>
 
-<section style="padding-top:20px;">
-  <div class="container">
-    <div class="section-head">
-      <span class="kicker">Thực đơn</span>
-      <h2>Toàn bộ sản phẩm</h2>
-      <p>Chọn danh mục hoặc tìm kiếm theo tên món.</p>
+      <div class="filter-bar" id="filter-bar">
+        <!-- JS fills -->
+      </div>
+
+      <div class="prod-grid" id="products-grid">
+        <!-- JS fills -->
+      </div>
     </div>
 
-    <div class="filter-bar" id="filter-bar">
-      <!-- JS fills -->
-    </div>
-
-    <div class="prod-grid" id="products-grid">
-      <!-- JS fills -->
-    </div>
+    <aside class="products-side" id="facebook">
+      <h3>Mới nhất từ Facebook</h3>
+      <div class="fb-embed">
+        <iframe
+          src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D100063909225074&tabs=timeline&width=360&height=600&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true"
+          width="360" height="600" style="border:none;overflow:hidden;width:100%;"
+          scrolling="no" frameborder="0" allowfullscreen="true"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          title="Facebook - Bếp Nhà Muội"></iframe>
+      </div>
+    </aside>
   </div>
 </section>
 
@@ -115,6 +111,7 @@
     </div>
     <div class="foot-bottom">
       © <span data-shop-year></span> <span data-shop-name></span>. All rights reserved.
+      <a class="admin-link" href="admin.html">Quản lý</a>
     </div>
   </div>
 </footer>

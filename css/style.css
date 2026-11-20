@@ -276,6 +276,29 @@ section { padding: 80px 0; }
 .fb-feed { padding-bottom: 40px; }
 .fb-embed { background: #fff; border-radius: 16px; padding: 16px; box-shadow: var(--shadow); overflow: hidden; max-width: 532px; margin: 0 auto; }
 .fb-embed iframe { display: block; width: 100%; max-width: 100%; border: 0; }
+
+/* Home: Facebook (left) + About (right) */
+.split-grid { display: grid; grid-template-columns: minmax(0, 500px) minmax(0, 1fr); gap: 60px; align-items: stretch; justify-content: center; }
+.split-fb .split-head { margin-bottom: 20px; }
+.split-fb .split-head .kicker { color: var(--caramel); font-weight: 600; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+.split-fb .split-head h2 { font-size: clamp(24px, 3vw, 32px); margin: 8px 0 8px; }
+.split-fb .split-head p { color: var(--muted); font-size: 16px; }
+.split-fb .fb-embed { max-width: none; margin: 0; }
+.split-about { display: flex; flex-direction: column; justify-content: space-between; gap: 32px; padding-top: 8px; }
+.split-about h2 { margin-bottom: 20px; }
+.split-about p { color: var(--muted); margin-bottom: 16px; font-size: 16px; }
+.split-about .about-stats { margin-top: 0; flex-wrap: wrap; }
+
+/* Products: grid (left) + sticky Facebook sidebar (right) */
+.products-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 36px; align-items: start; }
+.products-main .prod-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
+.products-main .section-head { max-width: none; }
+.products-side { position: sticky; top: 90px; }
+.products-side h3 { font-size: 20px; margin-bottom: 12px; text-align: center; }
+.products-side .fb-embed { max-width: none; margin: 0; }
+.admin-link { margin-left: 12px; color: #8a735c; font-size: 12px; opacity: .7; }
+.admin-link:hover { opacity: 1; color: var(--gold); }
+
 .contact-wrap { max-width: 640px; margin: 0 auto; }
 
 .contact-card {
@@ -389,7 +412,9 @@ body.lightbox-open { overflow: hidden; }
   .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--cream); flex-direction: column; padding: 20px; gap: 16px; box-shadow: var(--shadow); }
   .nav-links.open { display: flex; }
   .burger { display: block; }
-  .hero-grid, .about-grid, .foot-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero-grid, .about-grid, .foot-grid, .split-grid, .products-layout { grid-template-columns: 1fr; gap: 40px; }
+  .split-fb .fb-embed { max-width: 532px; }
+  .products-side { position: static; max-width: 420px; margin: 0 auto; width: 100%; }
   .foot-grid { grid-template-columns: 1fr 1fr; }
   section { padding: 56px 0; }
   .hero { padding: 50px 0 70px; }
