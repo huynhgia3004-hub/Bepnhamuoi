@@ -2,9 +2,10 @@
 (function () {
   'use strict';
   var C = window.AdminCore;
-  var LS_KEY = 'bnm_admin';
-  var token = null;      // in memory only
+  var SS_KEY = 'bnm_admin_tk';   // sessionStorage: token for this tab only
+  var token = null;      // in memory
   var api = null;
+  var keyExists = false; // does data/admin-key.json exist (known from last check)
   var data = null;       // {shop, categories, products}
   var editingId = null;  // null = new
   var pickedImage = null; // {b64, previewUrl}
@@ -13,14 +14,19 @@
   function $(id) { return document.getElementById(id); }
   function show(el, on) { el.hidden = !on; }
   function setText(el, t) { el.textContent = t; show(el, !!t); }
+  function ssGet() { try { return sessionStorage.getItem(SS_KEY); } catch (e) { return null; } }
+  function ssSet(v) { try { if (v) sessionStorage.setItem(SS_KEY, v); else sessionStorage.removeItem(SS_KEY); } catch (e) { /* ignore */ } }
+  try { localStorage.removeItem('bnm_admin'); } catch (e) { /* legacy storage, no longer used */ }
 
   /* ---------- views ---------- */
   function showView(name) {
     show($('view-setup'), name === 'setup');
-    show($('view-pin'), name === 'pin');
+    show($('view-login'), name === 'login');
     show($('view-main'), name === 'main');
     show($('btn-logout'), name === 'main');
-    if (name !== 'main') banner('');
+    show($('btn-chpw'), name === 'main');
+    show($('setup-back-wrap'), name === 'setup' && keyExists);
+    if (name !== 'main') { banner(''); show($('auth-box'), false); }
   }
   var bannerTimer = null;
   function banner(text, isError) {
@@ -35,86 +41,170 @@
     var r = C.friendlyReason(err);
     return 'Không lưu được, thử lại' + (r ? ' (' + r + ')' : '');
   }
+  /* 401/403: token expired or revoked */
+  function isAuth(e) { return !!(e && e.kind === 'auth'); }
+  function showAuthExpired() { show($('auth-box'), true); }
 
-  function readSaved() {
-    try {
-      var s = JSON.parse(localStorage.getItem(LS_KEY) || 'null');
-      return s && s.salt && s.iv && s.ct ? s : null;
-    } catch (e) { return null; }
+  function netText(e) {
+    if (e && e.kind === 'network') return 'Mất mạng, thử lại.';
+    return 'Không đọc được dữ liệu đăng nhập, thử lại.';
+  }
+
+  /* decide first screen */
+  function showLoginOrSetup() {
+    return C.readKeyFile().then(function (r) {
+      keyExists = r.state === 'ok';
+      showView(keyExists ? 'login' : 'setup');
+      if (keyExists) $('login-pw').focus();
+    }, function (e) {
+      console.error(e);
+      keyExists = true; // unknown: show login, submit re-reads
+      showView('login');
+      setText($('login-error'), netText(e));
+    });
   }
 
   function start() {
     token = null; api = null; data = null;
-    showView(readSaved() ? 'pin' : 'setup');
-    if (readSaved()) $('pin-input').focus();
+    var saved = ssGet();
+    if (saved) {
+      token = saved; api = C.createApi({ token: saved });
+      keyExists = true;
+      return enterMain();
+    }
+    return showLoginOrSetup();
   }
 
-  /* ---------- setup ---------- */
+  function logout() {
+    ssSet(null); token = null; api = null; data = null;
+    closeModal(); closePw();
+    $('list').innerHTML = '';
+    $('login-pw').value = ''; setText($('login-error'), '');
+    return showLoginOrSetup();
+  }
+
+  function loggedIn(tk, tmpApi) {
+    token = tk; api = tmpApi || C.createApi({ token: tk });
+    keyExists = true;
+    ssSet(tk);
+    enterMain();
+  }
+
+  /* ---------- login ---------- */
+  $('form-login').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (busy) return;
+    var pw = $('login-pw').value, err = $('login-error');
+    if (!pw) return setText(err, 'Vui lòng nhập password.');
+    setText(err, '');
+    busy = true;
+    var btn = $('login-submit'); btn.disabled = true; btn.textContent = 'Đang kiểm tra…';
+    C.loginWithPassword(pw).then(function (tk) {
+      $('login-pw').value = '';
+      loggedIn(tk);
+    }, function (e) {
+      if (e && e.kind === 'badpw') {
+        setText(err, 'Sai password');
+        $('login-pw').value = ''; $('login-pw').focus();
+      } else if (e && e.kind === 'nokey') {
+        keyExists = false; showView('setup');
+      } else {
+        console.error(e);
+        setText(err, netText(e));
+      }
+    }).then(function () { busy = false; btn.disabled = false; btn.textContent = 'Vào'; });
+  });
+
+  function openSetup() {
+    $('setup-token').value = ''; $('setup-pw').value = ''; $('setup-pw2').value = '';
+    setText($('setup-error'), '');
+    showView('setup');
+    $('setup-token').focus();
+  }
+  $('link-forgot').addEventListener('click', function (ev) { ev.preventDefault(); openSetup(); });
+  $('btn-newtoken').addEventListener('click', function () {
+    ssSet(null); token = null; api = null; data = null;
+    $('list').innerHTML = '';
+    openSetup();
+  });
+  $('link-back').addEventListener('click', function (ev) {
+    ev.preventDefault();
+    setText($('login-error'), '');
+    showView('login'); $('login-pw').focus();
+  });
+
+  /* ---------- setup / forgot ---------- */
   $('form-setup').addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (busy) return;
-    var tk = $('setup-token').value.trim(), pin = $('setup-pin').value, pin2 = $('setup-pin2').value;
+    var tk = $('setup-token').value.trim(), pw = $('setup-pw').value, pw2 = $('setup-pw2').value;
     var err = $('setup-error');
     if (!tk) return setText(err, 'Vui lòng dán mã quản lý.');
-    if (!/^\d{4,8}$/.test(pin)) return setText(err, 'Mã PIN phải gồm 4 đến 8 chữ số.');
-    if (pin !== pin2) return setText(err, 'Hai mã PIN không giống nhau.');
+    var problem = C.passwordProblem(pw, pw2);
+    if (problem) return setText(err, problem);
     setText(err, '');
     busy = true;
     var btn = $('setup-submit'); btn.disabled = true; btn.textContent = 'Đang kiểm tra…';
     var tmp = C.createApi({ token: tk });
     C.validateToken(tmp).then(function () {
-      return C.encryptToken(tk, pin);
-    }).then(function (blob) {
-      localStorage.setItem(LS_KEY, JSON.stringify(blob));
-      token = tk; api = tmp;
-      $('setup-token').value = ''; $('setup-pin').value = ''; $('setup-pin2').value = '';
-      enterMain();
+      return C.setupPassword(tmp, tk, pw, pw2);
+    }).then(function () {
+      $('setup-token').value = ''; $('setup-pw').value = ''; $('setup-pw2').value = '';
+      loggedIn(tk, tmp);
     }).catch(function (e) {
       console.error(e);
-      var msg = 'Không kiểm tra được mã, thử lại.';
-      if (e && (e.kind === 'auth' || e.status === 404)) msg = 'Mã quản lý không đúng hoặc đã hết hạn.';
+      var msg = 'Không lưu được, thử lại.';
+      if (e && (e.kind === 'auth' || (e.kind === 'notfound' && e.status === 404))) msg = 'Mã quản lý không đúng hoặc đã hết hạn.';
       else if (e && e.kind === 'noperm') msg = 'Mã này không có quyền sửa website. Hãy nhờ Pháp tạo mã mới.';
       else if (e && e.kind === 'network') msg = 'Mất mạng, thử lại.';
+      else if (e && e.kind === 'invalid') msg = e.detail;
       setText(err, msg);
     }).then(function () {
       busy = false; btn.disabled = false; btn.textContent = 'Lưu và bắt đầu';
     });
   });
 
-  /* ---------- PIN ---------- */
-  $('form-pin').addEventListener('submit', function (ev) {
+  $('btn-logout').addEventListener('click', function () { logout(); });
+
+  /* ---------- change password ---------- */
+  function openPw() {
+    $('pw-old').value = ''; $('pw-new').value = ''; $('pw-new2').value = '';
+    setText($('pw-error'), ''); show($('pw-saving'), false); setPwBusy(false);
+    show($('modal-pw'), true);
+    document.body.style.overflow = 'hidden';
+    $('pw-old').focus();
+  }
+  function closePw() {
+    show($('modal-pw'), false);
+    document.body.style.overflow = '';
+    $('pw-old').value = ''; $('pw-new').value = ''; $('pw-new2').value = '';
+  }
+  function setPwBusy(on) {
+    $('pw-ok').disabled = on; $('pw-cancel').disabled = on;
+    show($('pw-saving'), on);
+  }
+  $('btn-chpw').addEventListener('click', openPw);
+  $('pw-cancel').addEventListener('click', function () { if (!busy) closePw(); });
+  $('form-pw').addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (busy) return;
-    var saved = readSaved(), err = $('pin-error');
-    if (!saved) return start();
-    var pin = $('pin-input').value;
+    var o = $('pw-old').value, n = $('pw-new').value, n2 = $('pw-new2').value, err = $('pw-error');
+    if (!o) return setText(err, 'Vui lòng nhập password cũ.');
+    var problem = C.passwordProblem(n, n2, o);
+    if (problem) return setText(err, problem);
     setText(err, '');
-    busy = true;
-    var btn = $('pin-submit'); btn.disabled = true;
-    C.decryptToken(saved, pin).then(function (tk) {
-      token = tk; api = C.createApi({ token: tk });
-      $('pin-input').value = '';
-      enterMain();
-    }, function () {
-      setText(err, 'Sai mã PIN');
-      $('pin-input').value = ''; $('pin-input').focus();
-    }).then(function () { busy = false; btn.disabled = false; });
-  });
-
-  $('link-forgot').addEventListener('click', function (ev) {
-    ev.preventDefault();
-    if (confirm('Xóa mã đã lưu trên máy này và nhập mã mới?')) {
-      localStorage.removeItem(LS_KEY);
-      $('pin-input').value = '';
-      setText($('pin-error'), '');
-      start();
-    }
-  });
-
-  $('btn-logout').addEventListener('click', function () {
-    closeModal();
-    $('list').innerHTML = '';
-    start();
+    busy = true; setPwBusy(true);
+    C.changePassword(api, o, n, n2).then(function () {
+      closePw();
+      banner('Đã đổi password!');
+      window.scrollTo(0, 0);
+    }, function (e) {
+      console.error(e);
+      if (e && e.kind === 'badpw') { setText(err, 'Sai password cũ'); $('pw-old').value = ''; $('pw-old').focus(); }
+      else if (isAuth(e)) { closePw(); showAuthExpired(); window.scrollTo(0, 0); }
+      else if (e && e.kind === 'invalid') setText(err, e.detail);
+      else setText(err, 'Không đổi được password, thử lại' + (C.friendlyReason(e) ? ' (' + C.friendlyReason(e) + ')' : '') + '.');
+    }).then(function () { busy = false; setPwBusy(false); });
   });
 
   /* ---------- list ---------- */
@@ -131,7 +221,7 @@
     }).catch(function (e) {
       console.error(e);
       setText($('list-error'), 'Không tải được danh sách (' + (C.friendlyReason(e) || 'lỗi') + '). Kéo xuống để thử lại hoặc bấm Thoát rồi vào lại.');
-      if (e && e.kind === 'auth') banner('Mã quản lý hết hạn. Bấm "Thoát", chọn "Quên PIN / dùng mã mới".', true);
+      if (isAuth(e)) showAuthExpired();
     }).then(function () { show($('loading'), false); });
   }
 
@@ -187,7 +277,7 @@
       banner('Đã xóa! Website sẽ cập nhật sau khoảng 1 phút.');
     }).catch(function (e) {
       console.error(e);
-      banner(failText(e), true);
+      if (isAuth(e)) showAuthExpired(); else banner(failText(e), true);
     }).then(function () { busy = false; show($('loading'), false); window.scrollTo(0, 0); });
   }
 
@@ -337,7 +427,8 @@
       refresh();
     }).catch(function (e) {
       console.error(e);
-      setText(err, failText(e));
+      if (isAuth(e)) { closeModal(); showAuthExpired(); window.scrollTo(0, 0); }
+      else setText(err, failText(e));
     }).then(function () { busy = false; setFormBusy(false); });
   });
 

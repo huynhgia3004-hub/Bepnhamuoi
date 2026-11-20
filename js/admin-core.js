@@ -154,10 +154,10 @@
       var init = {
         method: method,
         headers: {
-          'Authorization': 'Bearer ' + token,
           'Accept': 'application/vnd.github+json'
         }
       };
+      if (token) init.headers['Authorization'] = 'Bearer ' + token;
       if (body !== undefined) {
         init.headers['Content-Type'] = 'application/json';
         init.body = JSON.stringify(body);
@@ -272,27 +272,130 @@
     });
   }
 
-  /* ---------- PIN encryption (WebCrypto) ---------- */
+  /* ---------- password encryption (WebCrypto) + key file in repo ---------- */
+  var KEY_PATH = 'data/admin-key.json';
+  var KDF_ITER = 600000;
+  var MIN_PW = 8;
+  var PW_HINT = 'Password phải có ít nhất 8 ký tự — càng dài càng an toàn';
+
+  /* null = ok, else Vietnamese message. pw2 / oldPw optional. */
+  function passwordProblem(pw, pw2, oldPw) {
+    pw = pw == null ? '' : String(pw);
+    if (pw.length < MIN_PW) return PW_HINT;
+    if (pw2 !== undefined && pw !== pw2) return 'Hai password không giống nhau.';
+    if (oldPw !== undefined && pw === oldPw) return 'Password mới phải khác password cũ.';
+    return null;
+  }
+
   function subtle() { return (globalThis.crypto || {}).subtle; }
-  function deriveKey(pin, salt) {
-    return subtle().importKey('raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveKey']).then(function (km) {
-      return subtle().deriveKey({ name: 'PBKDF2', salt: salt, iterations: 200000, hash: 'SHA-256' },
+  function deriveKey(pw, salt, iter) {
+    return subtle().importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']).then(function (km) {
+      return subtle().deriveKey({ name: 'PBKDF2', salt: salt, iterations: iter, hash: 'SHA-256' },
         km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
     });
   }
-  function encryptToken(token, pin) {
+  /* => {v,kdf,iter,salt,iv,ct} (the exact content of data/admin-key.json) */
+  function encryptToken(token, pw) {
     var salt = globalThis.crypto.getRandomValues(new Uint8Array(16));
     var iv = globalThis.crypto.getRandomValues(new Uint8Array(12));
-    return deriveKey(pin, salt).then(function (key) {
+    return deriveKey(pw, salt, KDF_ITER).then(function (key) {
       return subtle().encrypt({ name: 'AES-GCM', iv: iv }, key, new TextEncoder().encode(token));
     }).then(function (ct) {
-      return { salt: bytesToB64(salt), iv: bytesToB64(iv), ct: bytesToB64(new Uint8Array(ct)) };
+      return { v: 1, kdf: 'PBKDF2-SHA256', iter: KDF_ITER, salt: bytesToB64(salt), iv: bytesToB64(iv), ct: bytesToB64(new Uint8Array(ct)) };
     });
   }
-  function decryptToken(blob, pin) {
-    return deriveKey(pin, b64ToBytes(blob.salt)).then(function (key) {
-      return subtle().decrypt({ name: 'AES-GCM', iv: b64ToBytes(blob.iv) }, key, b64ToBytes(blob.ct));
-    }).then(function (pt) { return new TextDecoder().decode(pt); });
+  /* wrong password (or tampered file) => ApiError('badpw') */
+  function decryptToken(blob, pw) {
+    return Promise.resolve().then(function () {
+      var iter = blob.iter;
+      if (!(iter >= 100000 && iter <= 5000000)) throw ApiError('badkey', 0);
+      return deriveKey(pw, b64ToBytes(blob.salt), iter).then(function (key) {
+        return subtle().decrypt({ name: 'AES-GCM', iv: b64ToBytes(blob.iv) }, key, b64ToBytes(blob.ct));
+      }).then(function (pt) { return new TextDecoder().decode(pt); }, function () { throw ApiError('badpw', 0); });
+    });
+  }
+
+  function parseKeyText(text) {
+    var j;
+    try { j = JSON.parse(text); } catch (e) { throw ApiError('badkey', 0); }
+    if (!j || j.v !== 1 || typeof j.salt !== 'string' || typeof j.iv !== 'string' || typeof j.ct !== 'string') throw ApiError('badkey', 0);
+    return j;
+  }
+
+  /* Public read of the key file. => {state:'ok', blob, sha|null} | {state:'no-key'}.
+     GitHub API first (fresh, unauthenticated); on any non-404 failure fall back to same-origin file. */
+  function readKeyFile(opts) {
+    opts = opts || {};
+    var f = opts.fetch || (typeof fetch !== 'undefined' ? fetch.bind(globalThis) : null);
+    var api = createApi({ fetch: f, token: null });
+    function sameOrigin() {
+      return Promise.resolve().then(function () { return f(KEY_PATH + '?t=' + Date.now()); }).then(function (res) {
+        if (res.status === 404) return { state: 'no-key' };
+        if (!res.ok) throw ApiError('other', res.status);
+        return res.text().then(function (t) { return { state: 'ok', blob: parseKeyText(t), sha: null }; });
+      }, function (err) {
+        if (err && err.kind) throw err;
+        throw ApiError('network', 0, String(err && err.message));
+      });
+    }
+    return api.getFile(KEY_PATH).then(function (r) {
+      return { state: 'ok', blob: parseKeyText(r.text), sha: r.sha };
+    }, function (err) {
+      if (err && err.kind === 'notfound') return { state: 'no-key' };
+      return sameOrigin();
+    });
+  }
+
+  /* => token string. Errors: nokey | badpw | badkey | network ... */
+  function loginWithPassword(pw, opts) {
+    return readKeyFile(opts).then(function (r) {
+      if (r.state !== 'ok') throw ApiError('nokey', 404);
+      return decryptToken(r.blob, pw);
+    });
+  }
+
+  function invalid(msg) { return ApiError('invalid', 0, msg); }
+  function putKey(api, blob, sha, message) {
+    return api.putFile(KEY_PATH, utf8ToB64(serialize(blob)), message, sha);
+  }
+  function retryConflict(run) {
+    var attempt = 0;
+    function go() {
+      return run().catch(function (err) {
+        if (err && err.kind === 'conflict' && attempt < 2) { attempt++; return go(); }
+        throw err;
+      });
+    }
+    return go();
+  }
+
+  /* First-time setup / forgot: api must hold a validated write token. */
+  function setupPassword(api, token, pw, pw2) {
+    var problem = passwordProblem(pw, pw2);
+    if (problem) return Promise.reject(invalid(problem));
+    return encryptToken(token, pw).then(function (blob) {
+      return retryConflict(function () {
+        return api.getFileSha(KEY_PATH).then(null, function (err) {
+          if (err && err.kind === 'notfound') return undefined;
+          throw err;
+        }).then(function (sha) { return putKey(api, blob, sha, 'Dat password quan ly'); });
+      });
+    });
+  }
+
+  /* Change password; token stays the same. => token. Errors: invalid | badpw | conflict | auth ... */
+  function changePassword(api, oldPw, newPw, newPw2) {
+    var problem = passwordProblem(newPw, newPw2, oldPw);
+    if (problem) return Promise.reject(invalid(problem));
+    return retryConflict(function () {
+      return api.getFile(KEY_PATH).then(function (f) {
+        return decryptToken(parseKeyText(f.text), oldPw).then(function (tk) {
+          return encryptToken(tk, newPw).then(function (nb) {
+            return putKey(api, nb, f.sha, 'Doi password quan ly');
+          }).then(function () { return tk; });
+        });
+      });
+    });
   }
 
   /* friendly Vietnamese reason for an error */
@@ -313,6 +416,9 @@
     serialize: serialize, upsertProduct: upsertProduct, deleteProduct: deleteProduct,
     canDeleteImage: canDeleteImage, createApi: createApi, validateToken: validateToken,
     loadData: loadData, commitData: commitData, saveProduct: saveProduct, removeProduct: removeProduct,
-    encryptToken: encryptToken, decryptToken: decryptToken, friendlyReason: friendlyReason
+    KEY_PATH: KEY_PATH, MIN_PW: MIN_PW, PW_HINT: PW_HINT, passwordProblem: passwordProblem,
+    encryptToken: encryptToken, decryptToken: decryptToken, readKeyFile: readKeyFile,
+    loginWithPassword: loginWithPassword, setupPassword: setupPassword, changePassword: changePassword,
+    friendlyReason: friendlyReason
   };
 });

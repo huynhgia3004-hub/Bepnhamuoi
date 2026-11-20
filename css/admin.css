@@ -59,3 +59,11 @@
 .adm-preview { margin-bottom: 10px; }
 .adm-preview img { width: 100%; max-height: 240px; object-fit: contain; border-radius: 12px; background: var(--cream); display: block; }
 .adm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+
+/* password login */
+.adm-header-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.adm-hint { display: block; margin-top: 6px; color: var(--muted); font-size: .85rem; line-height: 1.4; font-weight: 400; }
+.adm-authbox { display: flex; flex-direction: column; gap: 10px; align-items: stretch; font-weight: 600; }
+.adm-authbox .btn { min-height: 48px; cursor: pointer; }
+@media (max-width: 480px) { .adm-header-inner { align-items: flex-start; } .adm-logout { padding: 8px 12px; } }
+.adm-card .adm-center { margin: 16px 0 0; }
